@@ -80,7 +80,7 @@ server = getAllVehicles
     -- curl http://localhost:8081/vehicles/issues/1?sortBy=priority
 
     putIssues :: Int -> [Issue] -> EitherT ServantErr IO [Issue]
-    putIssues i is = byIdHelper (const is) i 
+    putIssues i = flip byIdHelper i . const
     -- echo '[{"issueType":"Powertrain","priority":"Low"}]' | curl -X PUT -d @- http://localhost:8081/vehicles/issues/1 --header "Content-Type:application/json"
 
 
