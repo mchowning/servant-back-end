@@ -3,46 +3,45 @@
 module Types where
 
 import Data.Aeson
-import Data.Text (Text)
+import Data.Text
 import GHC.Generics
 
 
-data Artist = Artist { artistName :: Text
-                     , albums     :: [Album] } deriving (Eq, Show, Generic)
+data Vehicle = Vehicle { dbId   :: Maybe Int
+                       , vin    :: Text
+                       , year   :: Int
+                       , model  :: Text
+                       , color  :: Text
+                       , issues :: [Issue] } deriving (Eq, Show, Generic)
 
 
-data Album = Album { albumName :: Text
-                   , year      :: Int
-                   , albumLen  :: Len
-                   , songs     :: [Song] } deriving (Eq, Show, Generic)
+data Issue = Issue { issueType :: IssueType
+                   , priority  :: Priority } deriving (Eq, Show, Generic, Ord)
 
 
-data Len = Len { mins :: Int
-               , secs :: Int } deriving (Eq, Show, Generic)
+data IssueType = Battery
+               | Brakes
+               | Electrical
+               | Exhaust
+               | Powertrain deriving (Eq, Show, Generic, Ord)
 
 
-data Song = Song { songName :: Text
-                 , songLen  :: Len } deriving (Eq, Show, Generic)
+data Priority = High | Med | Low deriving (Eq, Show, Generic, Ord)
 
 
-instance ToJSON Artist
+instance ToJSON Vehicle
   where
     toJSON = genericToJSON defaultOptions
-
-
-instance ToJSON Album
+instance ToJSON Issue
   where
     toJSON = genericToJSON defaultOptions
-
-
-instance ToJSON Len
+instance ToJSON IssueType
   where
     toJSON = genericToJSON defaultOptions
-
-
-instance ToJSON Song
+instance ToJSON Priority
   where
     toJSON = genericToJSON defaultOptions
-
-
-data SortBy = Name | Year | Length
+instance FromJSON Vehicle
+instance FromJSON Issue
+instance FromJSON IssueType
+instance FromJSON Priority

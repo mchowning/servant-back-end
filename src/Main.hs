@@ -1,50 +1,98 @@
 {-# LANGUAGE DataKinds, OverloadedStrings, TypeOperators #-}
 
-module Main where
+module Main (main) where
 
 import Types
 import InitData
 
 import Control.Monad.Trans.Either
+import Data.Function
+import Data.List
 import Network.Wai
 import Network.Wai.Handler.Warp
+import qualified Data.IntMap.Lazy as IM
 import Servant
 
 
-type DiscAPI = "all"                        :> Get '[JSON] [Artist]
-          :<|> "artist" :> Capture "id" Int :> Get '[JSON] Artist
+type VehicleAPI =
+       "vehicles" :> "all"                                       :> Get  '[JSON] [Vehicle]
+  :<|> "vehicles" :> Capture "id" Int                            :> Get  '[JSON] Vehicle
+  :<|> "vehicles" :>                     ReqBody '[JSON] Vehicle :> Post '[JSON] Vehicle
+  :<|> "vehicles" :> Capture "id" Int :> ReqBody '[JSON] Vehicle :> Put  '[JSON] Vehicle
+  -----
+  :<|> "vehicles" :> "issues" :> Capture "id" Int :> QueryParam "sortBy" SortBy :> Get '[JSON] [Issue]
+  :<|> "vehicles" :> "issues" :> Capture "id" Int :> ReqBody '[JSON] [Issue]    :> Put '[JSON] [Issue]
 
 
-server :: Server DiscAPI
-server = handlerAll
-    :<|> handlerArtist
+data SortBy = ByType | ByPriority
+
+
+instance FromText SortBy where
+    fromText "type"     = Just ByType
+    fromText "priority" = Just ByPriority
+    fromText _          = Nothing
+
+
+instance ToText SortBy where
+    toText ByType     = "type"
+    toText ByPriority = "priority"
+
+
+server :: Server VehicleAPI
+server = getAllVehicles
+    :<|> getVehicleById
+    :<|> postVehicle
+    :<|> putVehicle
+    -----
+    :<|> getIssuesById
+    :<|> putIssues
   where
-    handlerAll :: EitherT ServantErr IO [Artist]
-    handlerAll = return artists
+    getAllVehicles :: EitherT ServantErr IO [Vehicle]
+    getAllVehicles = return . IM.elems $ vehicleTbl
+    -- curl http://localhost:8081/vehicles/all
 
-    handlerArtist :: Int -> EitherT ServantErr IO Artist
-    handlerArtist i = return $ artists !! i
+    getVehicleById :: Int -> EitherT ServantErr IO Vehicle
+    getVehicleById = byIdHelper id
+    -- curl http://localhost:8081/vehicles/0
+
+    byIdHelper f = maybe notFound (return . f) . (`IM.lookup` vehicleTbl)
+      where
+        notFound = left err404 { errBody = "Vehicle ID not found." }
+
+    postVehicle :: Vehicle -> EitherT ServantErr IO Vehicle
+    postVehicle v = let newId = head . ([0..] \\) . IM.keys $ vehicleTbl
+                    in return v { dbId = Just newId }
+    -- echo '{"color":"red","year":2013,"model":"Void","issues":[{"issueType":"Electrical","priority":"High"}],"vin":"vin x"}' | curl -X POST -d @- http://localhost:8081/vehicles --header "Content-Type:application/json"
+
+    putVehicle :: Int -> Vehicle -> EitherT ServantErr IO Vehicle
+    putVehicle i = flip byIdHelper i . const
+    -- echo '{"color":"grey","year":2012,"model":"Iterate","issues":[{"issueType":"Exhaust","priority":"Low"}],"vin":"vin y"}' | curl -X PUT -d @- http://localhost:8081/vehicles/0 --header "Content-Type:application/json"
+
+    getIssuesById :: Int -> Maybe SortBy -> EitherT ServantErr IO [Issue]
+    getIssuesById i = maybe (byIdHelper issues i) sortIssues
+      where
+        sortIssues how = flip byIdHelper i $ case how of
+            ByType     -> sortHelper issueType
+            ByPriority -> sortHelper priority
+        sortHelper f = sortBy (compare `on` f) . issues
+    -- curl http://localhost:8081/vehicles/issues/1
+    -- curl http://localhost:8081/vehicles/issues/1?sortBy=type
+    -- curl http://localhost:8081/vehicles/issues/1?sortBy=priority
+
+    putIssues :: Int -> [Issue] -> EitherT ServantErr IO [Issue]
+    putIssues i is = byIdHelper (const is) i 
+    -- echo '[{"issueType":"Powertrain","priority":"Low"}]' | curl -X PUT -d @- http://localhost:8081/vehicles/issues/1 --header "Content-Type:application/json"
 
 
 -- Establish the web server.
-discAPI :: Proxy DiscAPI
-discAPI = Proxy
+vehicleAPI :: Proxy VehicleAPI
+vehicleAPI = Proxy
 
 
 -- "serve" comes from servant and hands you a WAI Application.
 app :: Application
-app = serve discAPI server
+app = serve vehicleAPI server
 
 
 main :: IO ()
-main = run 8081 app -- http://localhost:8081/all or "curl http://localhost:8081/all"
-
-
-{-
-type UserAPI = "admins"                               :> Get    '[JSON] [Admin]
-          :<|> "others" :> Capture "id" Integer       :> Get    '[JSON] Other -- equivalent to 'GET /others/:id'
-          :<|> "others" :> Capture "id" Integer       :> Delete '[]     ()
-          :<|> "users"  :> QueryParam "sortby" SortBy :> Get    '[JSON] [User] -- equivalent to 'GET /users?sortby={age, name}'
-          :<|> "users"  :> ReqBody '[JSON] User       :> Post   '[JSON] User
-          :<|> Raw -- requests to anything else than /users go here, where the server will try to find a file with the right name at the right path
--}
+main = run 8081 app

@@ -1,2 +1,2 @@
 # servant-back-end
-A simple RESTful back end using Servant.
+Demo of an automotive back end using servant.
