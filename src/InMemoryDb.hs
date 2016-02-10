@@ -77,6 +77,7 @@ server ior = getAllVehicles
                     in (IM.insert i v' tbl, Just v')
     -- echo '{"color":"grey","year":2012,"model":"Iterate","issues":[{"issueType":"Exhaust","priority":"Low"}],"vin":"vin y"}' | curl -X PUT -d @- http://localhost:8081/vehicles/0 --header "Content-Type:application/json"
 
+    -- A good exercise would be to see if we can add more to this function.
     putHelper f = maybe oops return =<< liftIO (atomicModifyIORef ior f)
 
     getIssuesById :: Int -> Maybe SortBy -> EitherT ServantErr IO [Issue]
