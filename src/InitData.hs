@@ -8,14 +8,11 @@ import qualified Data.IntMap.Lazy as IM (IntMap, fromList)
 
 
 vehicleTbl :: IM.IntMap Vehicle
-vehicleTbl = IM.fromList vehicleAssocs
-
-
-vehicleAssocs :: [(Int, Vehicle)]
-vehicleAssocs = map mkVehicleAssoc [ (0, "vin 0", 2016, "M.Plus",  "black", [])
-                                   , (1, "vin 1", 2015, "Forever", "white", [ Issue Battery    Low
-                                                                            , Issue Electrical High
-                                                                            , Issue Brakes     Med ])
-                                   , (2, "vin 2", 2014, "Pure",    "blue",  []) ]
+vehicleTbl = IM.fromList $ let tuples = [ ("vin 0", 2016, "M.Plus",  "black", [])
+                                        , ("vin 1", 2015, "Forever", "white", [ Issue Battery    Low
+                                                                              , Issue Electrical High
+                                                                              , Issue Brakes     Med ])
+                                        , ("vin 2", 2014, "Pure",    "blue",  []) ]
+                           in zipWith f [0..] tuples
   where
-    mkVehicleAssoc (i, v, y, m, c, is) = (i, Vehicle (Just i) v y m c is)
+    f i (v, y, m, c, is) = (i, Vehicle (Just i) v y m c is)
