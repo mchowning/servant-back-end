@@ -1,11 +1,11 @@
 name:                servant-back-end
 version:             0.1.0.0
-synopsis:            A simple RESTful back end using Servant.
+synopsis:            Demo of an automotive back end using servant.
 license:             BSD3
 license-file:        LICENSE
 author:              Jason Stolaruk
 maintainer:          jason@detroitlabs.com
-copyright:           Copyright (c) 2015, Jason Stolaruk and Detroit Labs LLC
+copyright:           Copyright (c) 2016, Jason Stolaruk and Detroit Labs LLC
 category:            Web
 build-type:          Simple
 extra-source-files:  README.md
@@ -14,7 +14,7 @@ cabal-version:       >=1.10
 executable servant-back-end
   main-is:             Main.hs
   other-modules:       InitData, Types
-  other-extensions:    DataKinds, DeriveGeneric, TypeFamilies, TypeOperators
+  other-extensions:    DataKinds, DeriveGeneric, TypeOperators, OverloadedStrings
   build-depends:         base >=4.8 && <4.9
                        , containers >=0.5 && <0.6
                        , either >=4.4 && <5.0
@@ -26,4 +26,4 @@ executable servant-back-end
                        , warp >=3.1 && <4.0
   hs-source-dirs:      src
   default-language:    Haskell2010
-  ghc-options:         -Wall -Werror
+  ghc-options:         -O2 -Wall -Werror
