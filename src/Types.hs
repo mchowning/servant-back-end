@@ -2,9 +2,9 @@
 
 module Types where
 
-import Data.Aeson
-import Data.Text
-import GHC.Generics
+import Data.Aeson (FromJSON(..), ToJSON(..), defaultOptions, genericToJSON)
+import Data.Text (Text)
+import GHC.Generics (Generic)
 
 
 data Vehicle = Vehicle { dbId   :: Maybe Int

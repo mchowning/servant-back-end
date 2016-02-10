@@ -4,7 +4,7 @@ module InitData (vehicleTbl) where
 
 import Types
 
-import qualified Data.IntMap.Lazy as IM
+import qualified Data.IntMap.Lazy as IM (IntMap, fromList)
 
 
 vehicleTbl :: IM.IntMap Vehicle

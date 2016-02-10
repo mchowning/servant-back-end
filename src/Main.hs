@@ -2,15 +2,15 @@
 
 module Main (main) where
 
-import Types
 import InitData
+import Types
 
-import Control.Monad.Trans.Either
-import Data.Function
-import Data.List
-import Network.Wai
-import Network.Wai.Handler.Warp
-import qualified Data.IntMap.Lazy as IM
+import Control.Monad.Trans.Either (EitherT, left)
+import Data.Function (on)
+import Data.List ((\\), sortBy)
+import Network.Wai (Application)
+import Network.Wai.Handler.Warp (run)
+import qualified Data.IntMap.Lazy as IM (elems, keys, lookup)
 import Servant
 
 
