@@ -26,4 +26,4 @@ executable servant-back-end
                        , warp >=3.1 && <4.0
   hs-source-dirs:      src
   default-language:    Haskell2010
-  ghc-options:         -O2 -Wall -Werror
+  ghc-options:         -O2 -threaded -rtsopts -with-rtsopts=-N -Wall -Werror
