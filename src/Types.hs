@@ -11,7 +11,6 @@ data Vehicle = Vehicle { dbId   :: Maybe Int
                        , vin    :: Text
                        , year   :: Int
                        , model  :: Text
-                       , color  :: Text
                        , issues :: [Issue] } deriving (Eq, Show, Generic)
 
 

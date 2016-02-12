@@ -62,11 +62,11 @@ server = getAllVehicles
     postVehicle :: Vehicle -> EitherT ServantErr IO Vehicle
     postVehicle v = let newId = head . ([0..] \\) . IM.keys $ vehicleTbl
                     in return v { dbId = Just newId }
-    -- echo '{"color":"red","year":2013,"model":"Void","issues":[{"issueType":"Electrical","priority":"High"}],"vin":"vin x"}' | curl -X POST -d @- http://localhost:8081/vehicles --header "Content-Type:application/json"
+    -- echo '{"year":2013,"model":"Void","issues":[{"issueType":"Electrical","priority":"High"}],"vin":"vin x"}' | curl -X POST -d @- http://localhost:8081/vehicles --header "Content-Type:application/json"
 
     putVehicle :: Int -> Vehicle -> EitherT ServantErr IO Vehicle
     putVehicle i = flip byIdHelper i . const
-    -- echo '{"color":"grey","year":2012,"model":"Iterate","issues":[{"issueType":"Exhaust","priority":"Low"}],"vin":"vin y"}' | curl -X PUT -d @- http://localhost:8081/vehicles/0 --header "Content-Type:application/json"
+    -- echo '{"year":2012,"model":"Iterate","issues":[{"issueType":"Exhaust","priority":"Low"}],"vin":"vin y"}' | curl -X PUT -d @- http://localhost:8081/vehicles/0 --header "Content-Type:application/json"
 
     getIssuesById :: Int -> Maybe SortBy -> EitherT ServantErr IO [Issue]
     getIssuesById i = maybe (byIdHelper issues i) sortIssues

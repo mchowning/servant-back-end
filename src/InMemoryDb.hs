@@ -66,7 +66,7 @@ server ior = getAllVehicles
         f tbl = let newId = head . ([0..] \\) . IM.keys $ tbl
                     v'    = v { dbId = Just newId }
                 in (IM.insert newId v' tbl, v')
-    -- echo '{"color":"red","year":2013,"model":"Void","issues":[{"issueType":"Electrical","priority":"High"}],"vin":"vin x"}' | curl -X POST -d @- http://localhost:8081/vehicles --header "Content-Type:application/json"
+    -- echo '{"year":2013,"model":"Void","issues":[{"issueType":"Electrical","priority":"High"}],"vin":"vin x"}' | curl -X POST -d @- http://localhost:8081/vehicles --header "Content-Type:application/json"
 
     putVehicle :: Int -> Vehicle -> EitherT ServantErr IO Vehicle
     putVehicle i v = putHelper f
@@ -75,7 +75,7 @@ server ior = getAllVehicles
           where
             found = let v' = v { dbId = Just i }
                     in (IM.insert i v' tbl, Just v')
-    -- echo '{"color":"grey","year":2012,"model":"Iterate","issues":[{"issueType":"Exhaust","priority":"Low"}],"vin":"vin y"}' | curl -X PUT -d @- http://localhost:8081/vehicles/0 --header "Content-Type:application/json"
+    -- echo '{"year":2012,"model":"Iterate","issues":[{"issueType":"Exhaust","priority":"Low"}],"vin":"vin y"}' | curl -X PUT -d @- http://localhost:8081/vehicles/0 --header "Content-Type:application/json"
 
     -- A good exercise would be to see if we can add more to this function.
     putHelper f = maybe oops return =<< liftIO (atomicModifyIORef ior f)
