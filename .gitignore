@@ -1,6 +1,8 @@
 dist
 cabal-dev
 .stack-work
+.idea
+*.iml
 *.o
 *.hi
 *.chi
