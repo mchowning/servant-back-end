@@ -66,7 +66,7 @@ server = getAllVehicles
 
     putVehicle :: Int -> Vehicle -> EitherT ServantErr IO Vehicle
     putVehicle i = flip byIdHelper i . const
-    -- echo '{"year":2012,"model":"Iterate","issues":[{"issueType":"Exhaust","priority":"Low"}],"vin":"vin y"}' | curl -X PUT -d @- http://localhost:8081/vehicles/0 --header "Content-Type:application/json"
+    -- echo '{"year":2012,"model":"Iterate","issues":[{"issueType":"Battery","priority":"Low"}],"vin":"vin y"}' | curl -X PUT -d @- http://localhost:8081/vehicles/0 --header "Content-Type:application/json"
 
     getIssuesById :: Int -> Maybe SortBy -> EitherT ServantErr IO [Issue]
     getIssuesById i = maybe (byIdHelper issues i) sortIssues

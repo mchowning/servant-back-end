@@ -20,9 +20,7 @@ data Issue = Issue { issueType :: IssueType
 
 data IssueType = Battery
                | Brakes
-               | Electrical
-               | Exhaust
-               | Powertrain deriving (Eq, Show, Generic, Ord)
+               | Electrical deriving (Eq, Show, Generic, Ord)
 
 
 data Priority = High | Med | Low deriving (Eq, Show, Generic, Ord)

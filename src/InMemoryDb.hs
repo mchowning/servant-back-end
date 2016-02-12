@@ -75,7 +75,7 @@ server ior = getAllVehicles
           where
             found = let v' = v { dbId = Just i }
                     in (IM.insert i v' tbl, Just v')
-    -- echo '{"year":2012,"model":"Iterate","issues":[{"issueType":"Exhaust","priority":"Low"}],"vin":"vin y"}' | curl -X PUT -d @- http://localhost:8081/vehicles/0 --header "Content-Type:application/json"
+    -- echo '{"year":2012,"model":"Iterate","issues":[{"issueType":"Brakes","priority":"Low"}],"vin":"vin y"}' | curl -X PUT -d @- http://localhost:8081/vehicles/0 --header "Content-Type:application/json"
 
     -- A good exercise would be to see if we can add more to this function.
     putHelper f = maybe oops return =<< liftIO (atomicModifyIORef ior f)
@@ -98,7 +98,7 @@ server ior = getAllVehicles
           where
             found v = let v' = v { issues = is }
                       in (IM.insert i v' tbl, Just is)
-    -- echo '[{"issueType":"Powertrain","priority":"Low"}]' | curl -X PUT -d @- http://localhost:8081/vehicles/issues/1 --header "Content-Type:application/json"
+    -- echo '[{"issueType":"Electrical","priority":"Low"}]' | curl -X PUT -d @- http://localhost:8081/vehicles/issues/1 --header "Content-Type:application/json"
 
 
 -- Establish the web server.
