@@ -7,8 +7,7 @@ import Data.Text (Text)
 import GHC.Generics (Generic)
 
 
-data Vehicle = Vehicle { dbId   :: Maybe Int
-                       , vin    :: Text
+data Vehicle = Vehicle { vin    :: Text
                        , year   :: Int
                        , model  :: Text
                        , issues :: [Issue] } deriving (Eq, Show, Generic)

@@ -64,8 +64,7 @@ server ior = getAllVehicles
     postVehicle v = liftIO . atomicModifyIORef ior $ f
       where
         f tbl = let newId = head . ([0..] \\) . IM.keys $ tbl
-                    v'    = v { dbId = Just newId }
-                in (IM.insert newId v' tbl, v')
+                in (IM.insert newId v tbl, v)
     -- echo '{"year":2013,"model":"Void","issues":[{"issueType":"Electrical","priority":"High"}],"vin":"vin x"}' | curl -X POST -d @- http://localhost:8081/vehicles --header "Content-Type:application/json"
 
     putVehicle :: Int -> Vehicle -> EitherT ServantErr IO Vehicle
@@ -73,8 +72,7 @@ server ior = getAllVehicles
       where
         f tbl = maybe (tbl, Nothing) (const found) . IM.lookup i $ tbl
           where
-            found = let v' = v { dbId = Just i }
-                    in (IM.insert i v' tbl, Just v')
+            found = (IM.insert i v tbl, Just v)
     -- echo '{"year":2012,"model":"Iterate","issues":[{"issueType":"Brakes","priority":"Low"}],"vin":"vin y"}' | curl -X PUT -d @- http://localhost:8081/vehicles/0 --header "Content-Type:application/json"
 
     -- A good exercise would be to see if we can add more to this function.

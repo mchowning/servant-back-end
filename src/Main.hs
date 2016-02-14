@@ -7,12 +7,11 @@ import Types
 
 import Control.Monad.Trans.Either (EitherT, left)
 import Data.Function (on)
-import Data.List ((\\), sortBy)
+import Data.List (sortBy)
 import Network.Wai (Application)
 import Network.Wai.Handler.Warp (run)
-import qualified Data.IntMap.Lazy as IM (elems, keys, lookup)
+import qualified Data.IntMap.Lazy as IM (elems, lookup)
 import Servant
-
 
 type VehicleAPI =
        "vehicles" :> "all"                                       :> Get  '[JSON] [Vehicle]
@@ -55,13 +54,14 @@ server = getAllVehicles
     getVehicleById = byIdHelper id
     -- curl http://localhost:8081/vehicles/0
 
+    byIdHelper :: (Vehicle -> a) -> Int -> EitherT ServantErr IO a
     byIdHelper f = maybe notFound (return . f) . (`IM.lookup` vehicleTbl)
       where
         notFound = left err404 { errBody = "Vehicle ID not found." }
 
     postVehicle :: Vehicle -> EitherT ServantErr IO Vehicle
-    postVehicle v = let newId = head . ([0..] \\) . IM.keys $ vehicleTbl
-                    in return v { dbId = Just newId }
+    postVehicle v = do -- persist vehicle --
+                       return v
     -- echo '{"year":2013,"model":"Void","issues":[{"issueType":"Electrical","priority":"High"}],"vin":"vin x"}' | curl -X POST -d @- http://localhost:8081/vehicles --header "Content-Type:application/json"
 
     putVehicle :: Int -> Vehicle -> EitherT ServantErr IO Vehicle
