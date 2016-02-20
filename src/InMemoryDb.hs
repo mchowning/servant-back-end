@@ -55,7 +55,8 @@ server ior = getAllVehicles
     -- curl http://localhost:8081/vehicles/all
 
     getVehicleById :: Int -> EitherT ServantErr IO Vehicle
-    getVehicleById i = maybe oops return . IM.lookup i =<< liftIO (readIORef ior)
+    getVehicleById i = do tbl <- liftIO (readIORef ior)
+                          maybe oops return (IM.lookup i tbl)
     -- curl http://localhost:8081/vehicles/0
 
     oops :: EitherT ServantErr IO a
@@ -85,7 +86,8 @@ server ior = getAllVehicles
     putHelper :: forall a.
                  (IM.IntMap Vehicle -> (IM.IntMap Vehicle, Maybe a))
               -> EitherT ServantErr IO a
-    putHelper f = maybe oops return =<< liftIO putResult
+    putHelper f = do mPut <- liftIO putResult
+                     maybe oops return mPut
       where
         putResult :: IO (Maybe a)
         putResult = atomicModifyIORef ior f
