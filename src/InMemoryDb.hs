@@ -56,11 +56,11 @@ server ior = getAllVehicles
 
     getVehicleById :: Int -> EitherT ServantErr IO Vehicle
     getVehicleById i = do tbl <- liftIO (readIORef ior)
-                          maybe oops return (IM.lookup i tbl)
+                          maybe notFound return (IM.lookup i tbl)
     -- curl http://localhost:8081/vehicles/0
 
-    oops :: EitherT ServantErr IO a
-    oops = left err404 { errBody = "Vehicle ID not found." }
+    notFound :: EitherT ServantErr IO a
+    notFound = left err404 { errBody = "Vehicle ID not found." }
 
     postVehicle :: Vehicle -> EitherT ServantErr IO Vehicle
     postVehicle v = liftIO . atomicModifyIORef ior $ insert
@@ -87,7 +87,7 @@ server ior = getAllVehicles
                  (IM.IntMap Vehicle -> (IM.IntMap Vehicle, Maybe a))
               -> EitherT ServantErr IO a
     putHelper f = do mPut <- liftIO putResult
-                     maybe oops return mPut
+                     maybe notFound return mPut
       where
         putResult :: IO (Maybe a)
         putResult = atomicModifyIORef ior f
