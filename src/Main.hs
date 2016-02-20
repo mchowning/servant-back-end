@@ -68,15 +68,15 @@ server = getAllVehicles
     -- echo '{"year":2012,"model":"Iterate","issues":[{"issueType":"Battery","priority":"Low"}],"vin":"vin y"}' | curl -X PUT -d @- http://localhost:8081/vehicles/0 --header "Content-Type:application/json"
 
     getIssuesById :: Int -> Maybe SortBy -> EitherT ServantErr IO [Issue]
-    getIssuesById n msb = do is <- issues <$> getVehicleById n
-                             return $ maybe is (sortIssues is) msb
+    getIssuesById n msb = do unsorted <- issues <$> getVehicleById n
+                             return $ maybe unsorted (sortIssues unsorted) msb
       where
         sortIssues :: [Issue] -> SortBy -> [Issue]
         sortIssues is sb = case sb of
             ByType     -> sortHelper issueType is
             ByPriority -> sortHelper priority is
 
-        sortHelper :: Ord a => (Issue -> a) -> [Issue] -> [Issue]
+        sortHelper :: Ord b => (a -> b) -> [a] -> [a]
         sortHelper = sortBy . comparing
     -- curl http://localhost:8081/vehicles/issues/1
     -- curl http://localhost:8081/vehicles/issues/1?sortBy=type
