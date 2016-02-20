@@ -1,5 +1,4 @@
 {-# LANGUAGE DataKinds, OverloadedStrings, TypeOperators #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 
 module InMemoryDb (inMemoryDb) where
 
@@ -63,10 +62,10 @@ server ior = getAllVehicles
     notFound = left err404 { errBody = "Vehicle ID not found." }
 
     postVehicle :: Vehicle -> EitherT ServantErr IO Vehicle
-    postVehicle v = liftIO . atomicModifyIORef ior $ insert
+    postVehicle v = liftIO $ atomicModifyIORef ior insert
       where
         insert :: IM.IntMap Vehicle -> (IM.IntMap Vehicle, Vehicle)
-        insert tbl = let newUniqueId = head . ([0..] \\) . IM.keys $ tbl
+        insert tbl = let newUniqueId = head . ([0..] \\) $ IM.keys tbl
                          updatedTbl = IM.insert newUniqueId v tbl
                      in (updatedTbl, v)
     -- echo '{"year":2013,"model":"Void","issues":[{"issueType":"Electrical","priority":"High"}],"vin":"vin x"}' | curl -X POST -d @- http://localhost:8081/vehicles --header "Content-Type:application/json"
@@ -76,21 +75,15 @@ server ior = getAllVehicles
       where
         f :: IM.IntMap Vehicle -> (IM.IntMap Vehicle, Maybe Vehicle)
         f tbl = if IM.member i tbl
-                then (updatedTbl, Just v)
+                then let updatedTbl = IM.insert i v tbl
+                     in (updatedTbl, Just v)
                 else (tbl, Nothing)
-          where
-            updatedTbl = IM.insert i v tbl
     -- echo '{"year":2012,"model":"Iterate","issues":[{"issueType":"Brakes","priority":"Low"}],"vin":"vin y"}' | curl -X PUT -d @- http://localhost:8081/vehicles/0 --header "Content-Type:application/json"
 
     -- A good exercise would be to see if we can add more to this function.
-    putHelper :: forall a.
-                 (IM.IntMap Vehicle -> (IM.IntMap Vehicle, Maybe a))
-              -> EitherT ServantErr IO a
-    putHelper f = do mPut <- liftIO putResult
+    putHelper :: (IM.IntMap Vehicle -> (IM.IntMap Vehicle, Maybe a)) -> EitherT ServantErr IO a
+    putHelper f = do mPut <- liftIO $ atomicModifyIORef ior f
                      maybe notFound return mPut
-      where
-        putResult :: IO (Maybe a)
-        putResult = atomicModifyIORef ior f
 
     getIssuesById :: Int -> Maybe SortBy -> EitherT ServantErr IO [Issue]
     getIssuesById i msb = do unsorted <- issues <$> getVehicleById i
