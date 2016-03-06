@@ -62,12 +62,12 @@ server ior = getAllVehicles
     notFound = left err404 { errBody = "Vehicle ID not found." }
 
     postVehicle :: Vehicle -> EitherT ServantErr IO Vehicle
-    postVehicle v = liftIO $ atomicModifyIORef ior insert
+    postVehicle v = liftIO $ atomicModifyIORef ior insertIntoTbl
       where
-        insert :: IM.IntMap Vehicle -> (IM.IntMap Vehicle, Vehicle)
-        insert tbl = let newUniqueId = head . ([0..] \\) $ IM.keys tbl
-                         updatedTbl = IM.insert newUniqueId v tbl
-                     in (updatedTbl, v)
+        insertIntoTbl :: IM.IntMap Vehicle -> (IM.IntMap Vehicle, Vehicle)
+        insertIntoTbl tbl = let newUniqueId = head . ([0..] \\) $ IM.keys tbl
+                                tbl' = IM.insert newUniqueId v tbl
+                            in (tbl', v)
     -- echo '{"year":2013,"model":"Void","issues":[{"issueType":"Electrical","priority":"High"}],"vin":"vin x"}' | curl -X POST -d @- http://localhost:8081/vehicles --header "Content-Type:application/json"
 
     putVehicle :: Int -> Vehicle -> EitherT ServantErr IO Vehicle
@@ -75,8 +75,8 @@ server ior = getAllVehicles
       where
         f :: IM.IntMap Vehicle -> (IM.IntMap Vehicle, Maybe Vehicle)
         f tbl = if IM.member i tbl
-                then let updatedTbl = IM.insert i v tbl
-                     in (updatedTbl, Just v)
+                then let tbl' = IM.insert i v tbl
+                     in (tbl', Just v)
                 else (tbl, Nothing)
     -- echo '{"year":2012,"model":"Iterate","issues":[{"issueType":"Brakes","priority":"Low"}],"vin":"vin y"}' | curl -X PUT -d @- http://localhost:8081/vehicles/0 --header "Content-Type:application/json"
 
@@ -107,8 +107,8 @@ server ior = getAllVehicles
           where
             found :: Vehicle -> (IM.IntMap Vehicle, Maybe [Issue])
             found v = let v' = v { issues = is }
-                          updatedTbl = IM.insert i v' tbl
-                      in (updatedTbl, Just is)
+                          tbl' = IM.insert i v' tbl
+                      in (tbl', Just is)
     -- echo '[{"issueType":"Electrical","priority":"Low"}]' | curl -X PUT -d @- http://localhost:8081/vehicles/issues/1 --header "Content-Type:application/json"
 
 
